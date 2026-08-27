@@ -1,34 +1,54 @@
-const reactiveUtils = await $arcgis.import("@arcgis/core/core/reactiveUtils.js");
+const Map = await $arcgis.import("@arcgis/core/Map.js");
+const Basemap = await $arcgis.import("@arcgis/core/Basemap.js");
+const WMTSLayer = await $arcgis.import("@arcgis/core/layers/WMTSLayer.js");
 
 const viewElement = document.querySelector("arcgis-map");
-await viewElement.viewOnReady();
-viewElement.constraints.minScale = 1155582;
-
-const layer = viewElement.map.layers.getItemAt(0);
-const heatmapRenderer = layer.renderer.clone();
-// This simple renderer render all points as simple markers
-const simpleRenderer = {
-	type: "simple",
-	symbol: {
-		type: "simple-marker",
-		color: "#c80000",
-		size: 5,
+viewElement.spatialReference = { wkid: 2056 };
+viewElement.center = {
+	type: "point",
+	x: 2657560,
+	y: 1194592,
+	spatialReference: {
+		wkid: 2056,
 	},
 };
+viewElement.scale = 1500000;
 
-// When the scale is larger than 1:72,224 (zoomed in past that scale),
-// then switch from a heatmap renderer to a simple renderer. When zoomed
-// out beyond that scale, switch back to the heatmap renderer
-reactiveUtils.watch(
-	() => viewElement.scale,
-	(scale) => {
-		layer.renderer = scale <= 72224 ? simpleRenderer : heatmapRenderer;
-	},
-);
-// Hide the instructions when the user starts interacting with the sample
-const expandElement = document.querySelector("arcgis-expand");
-reactiveUtils
-	.whenOnce(() => viewElement.interacting)
-	.then(() => {
-		expandElement.expanded = false;
-	});
+const swisstopoWmts = new WMTSLayer();
+swisstopoWmts.url = "https://wmts.geo.admin.ch/EPSG/2056/1.0.0/WMTSCapabilities.xml";
+swisstopoWmts.activeLayer = { id: "ch.swisstopo.pixelkarte-farbe" };
+swisstopoWmts.copyright = "swisstopo";
+const basemapPixelkarte = new Basemap({
+	baseLayers: [swisstopoWmts],
+	title: "Pixelkarte farbig",
+	id: "swisstopo-pixelkarte-farbe",
+});
+
+const basemapPixelkarteGrau = new Basemap({
+	baseLayers: [createSwisstopoWmts("ch.swisstopo.pixelkarte-grau")],
+	title: "Pixelkarte grau",
+	id: "swisstopo-pixelkarte-grau",
+});
+
+const basemapSwissimage = new Basemap({
+	baseLayers: [createSwisstopoWmts("ch.swisstopo.swissimage")],
+	title: "Swissimage",
+	id: "swisstopo-swissimage",
+});
+
+viewElement.map = new Map({
+	basemap: basemapPixelkarte,
+});
+await viewElement.viewOnReady();
+
+const basemapGallery = document.querySelector("arcgis-basemap-gallery");
+basemapGallery.source = [basemapPixelkarte, basemapPixelkarteGrau, basemapSwissimage];
+basemapGallery.activeBasemap = basemapPixelkarte;
+
+function createSwisstopoWmts(layerId) {
+	const wmts = new WMTSLayer();
+	wmts.url = "https://wmts.geo.admin.ch/EPSG/2056/1.0.0/WMTSCapabilities.xml";
+	wmts.activeLayer = { id: layerId };
+	wmts.copyright = "swisstopo";
+	return wmts;
+}

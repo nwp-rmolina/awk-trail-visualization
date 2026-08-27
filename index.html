@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-    <title>Create a scale-dependent visualization | Sample | ArcGIS Maps SDK for JavaScript</title>
+    <title>swisstopo WMTS basemap</title>
 
     <!-- Load the ArcGIS Maps SDK for JavaScript from CDN -->
     <script type="module" src="https://js.arcgis.com/5.1/"></script>
@@ -23,13 +23,11 @@
   </head>
 
   <body>
-    <arcgis-map item-id="559f46c1162d4a09901438d92148e53a">
-      <arcgis-popup slot="popup"></arcgis-popup>
+    <arcgis-map>
       <arcgis-zoom slot="top-left"></arcgis-zoom>
-      <arcgis-expand slot="top-left" expand-icon="question" expand-tooltip="How to use this sample" expanded>
-        <div id="note">As you zoom in, the style will switch from a heatmap to individual points.</div>
+      <arcgis-expand slot="top-right" expand-icon="layers" expand-tooltip="Basemap selector">
+        <arcgis-basemap-gallery></arcgis-basemap-gallery>
       </arcgis-expand>
-      <arcgis-legend slot="bottom-left"></arcgis-legend>
     </arcgis-map>
     <script type="module" src="script.js"></script>
   </body>
