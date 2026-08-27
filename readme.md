@@ -4,4 +4,4 @@ Minimal ArcGIS Maps SDK for JavaScript example to test scale-dependent trail vis
 
 ## GitHub Pages
 
-Published at: https://nwp-rmolina.github.io/webmap-trail-scale-test/
+Published at: https://nwp-rmolina.github.io/awk-trail-visualization
