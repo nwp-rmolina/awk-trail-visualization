@@ -13,7 +13,7 @@ const SCALES = {
 	medium: 100000,
 };
 
-function createWalkSymbol(scale) {
+function createTrailSymbol(scale) {
 	let scaleFactor = 1;
 
 	if (scale <= SCALES.veryClose) {
@@ -65,7 +65,7 @@ const routeRenderer = new UniqueValueRenderer({
 	uniqueValueInfos: [
 		{
 			value: ROUTE_CATEGORY,
-			symbol: createWalkSymbol(50000),
+			symbol: createTrailSymbol(50000),
 		},
 	],
 });
@@ -86,7 +86,7 @@ viewElement.scale = 50000;
 const outdooractiveRoutes = new FeatureLayer({
 	url: ROUTE_SERVICE_URL,
 	outFields: ["*"],
-	opacity: 0.9,
+	opacity: 1,
 	title: "Outdooractive test routes",
 	renderer: routeRenderer,
 	visible: true,
@@ -129,15 +129,22 @@ routeLayerToggle?.addEventListener("change", () => {
 	outdooractiveRoutes.visible = routeLayerToggle.checked;
 });
 
+const scaleValueElement = document.getElementById("scale-value");
+const updateScaleReadout = () => {
+	const currentScale = Math.round(viewElement.view.scale);
+	scaleValueElement.textContent = currentScale.toLocaleString("en-US");
+};
+
 const updateRouteSymbolForScale = () => {
 	const currentScale = viewElement.view.scale;
 	routeRenderer.uniqueValueInfos = [
 		{
 			value: ROUTE_CATEGORY,
-			symbol: createWalkSymbol(currentScale),
+			symbol: createTrailSymbol(currentScale),
 		},
 	];
 	outdooractiveRoutes.renderer = routeRenderer;
+	updateScaleReadout();
 };
 
 viewElement.view.watch("scale", updateRouteSymbolForScale);
