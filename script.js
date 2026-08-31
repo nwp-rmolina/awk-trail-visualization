@@ -5,14 +5,22 @@ const WMTSLayer = await $arcgis.import("@arcgis/core/layers/WMTSLayer.js");
 const UniqueValueRenderer = await $arcgis.import("@arcgis/core/renderers/UniqueValueRenderer.js");
 const CIMSymbol = await $arcgis.import("@arcgis/core/symbols/CIMSymbol.js");
 
+const ROUTE_SERVICE_URL = "https://services1.arcgis.com/46913CWHRFmfQUln/arcgis/rest/services/oa_routenauszug_fuer_tests/FeatureServer/0";
+const ROUTE_CATEGORY = "wanderung";
+const SCALES = {
+	veryClose: 20000,
+	close: 50000,
+	medium: 100000,
+};
+
 function createWalkSymbol(scale) {
 	let scaleFactor = 1;
 
-	if (scale <= 20000) {
+	if (scale <= SCALES.veryClose) {
 		scaleFactor = 1.75;
-	} else if (scale <= 50000) {
+	} else if (scale <= SCALES.close) {
 		scaleFactor = 1.5;
-	} else if (scale <= 100000) {
+	} else if (scale <= SCALES.medium) {
 		scaleFactor = 1.25;
 	}
 
@@ -35,7 +43,7 @@ function createWalkSymbol(scale) {
 						enable: true,
 						capStyle: "ROUND",
 						joinStyle: "ROUND",
-						width: 2.5 * scaleFactor,
+						width: 2 * scaleFactor,
 						color: [190, 226, 98, 255],
 					},
 					{
@@ -56,13 +64,14 @@ const routeRenderer = new UniqueValueRenderer({
 	field: "kategorie",
 	uniqueValueInfos: [
 		{
-			value: "wanderung",
+			value: ROUTE_CATEGORY,
 			symbol: createWalkSymbol(50000),
 		},
 	],
 });
 
 const viewElement = document.querySelector("arcgis-map");
+const mapView = viewElement.view;
 viewElement.spatialReference = { wkid: 2056 };
 viewElement.center = {
 	type: "point",
@@ -75,7 +84,7 @@ viewElement.center = {
 viewElement.scale = 50000;
 
 const outdooractiveRoutes = new FeatureLayer({
-	url: "https://services1.arcgis.com/46913CWHRFmfQUln/arcgis/rest/services/oa_routenauszug_fuer_tests/FeatureServer/0",
+	url: ROUTE_SERVICE_URL,
 	outFields: ["*"],
 	opacity: 0.9,
 	title: "Outdooractive test routes",
@@ -116,7 +125,7 @@ basemapGallery.source = [basemapPixelkarte, basemapPixelkarteGrau, basemapSwissi
 basemapGallery.activeBasemap = basemapPixelkarte;
 
 const routeLayerToggle = document.getElementById("route-layer-toggle");
-routeLayerToggle.addEventListener("change", () => {
+routeLayerToggle?.addEventListener("change", () => {
 	outdooractiveRoutes.visible = routeLayerToggle.checked;
 });
 
@@ -124,7 +133,7 @@ const updateRouteSymbolForScale = () => {
 	const currentScale = viewElement.view.scale;
 	routeRenderer.uniqueValueInfos = [
 		{
-			value: "wanderung",
+			value: ROUTE_CATEGORY,
 			symbol: createWalkSymbol(currentScale),
 		},
 	];
