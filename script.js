@@ -6,14 +6,27 @@ const UniqueValueRenderer = await $arcgis.import("@arcgis/core/renderers/UniqueV
 const CIMSymbol = await $arcgis.import("@arcgis/core/symbols/CIMSymbol.js");
 
 const ROUTE_SERVICE_URL = "https://services1.arcgis.com/46913CWHRFmfQUln/arcgis/rest/services/oa_routenauszug_fuer_tests/FeatureServer/0";
-const ROUTE_CATEGORY = "wanderung";
+const ROUTE_FIELD = "kategorie";
+const WANDERUNG_CATEGORY = "wanderung";
+const THEMENWEG_CATEGORY = "themenweg";
 const SCALES = {
 	veryClose: 20000,
 	close: 50000,
 	medium: 100000,
 };
 
-function createTrailSymbol(scale) {
+const ROUTE_COLORS = {
+	[WANDERUNG_CATEGORY]: {
+		fade: [190, 226, 98, 255],
+		main: [153, 188, 66, 255],
+	},
+	[THEMENWEG_CATEGORY]: {
+		fade: [180, 209, 105, 255],
+		main: [126, 155, 55, 255],
+	},
+};
+
+function createTrailSymbol(scale, colors = ROUTE_COLORS[WANDERUNG_CATEGORY]) {
 	let scaleFactor = 1;
 
 	if (scale <= SCALES.veryClose) {
@@ -44,7 +57,7 @@ function createTrailSymbol(scale) {
 						capStyle: "ROUND",
 						joinStyle: "ROUND",
 						width: 2 * scaleFactor,
-						color: [190, 226, 98, 255],
+						color: colors.fade,
 					},
 					{
 						type: "CIMSolidStroke",
@@ -52,7 +65,7 @@ function createTrailSymbol(scale) {
 						capStyle: "ROUND",
 						joinStyle: "ROUND",
 						width: 4 * scaleFactor,
-						color: [153, 188, 66, 255],
+						color: colors.main,
 					},
 				],
 			},
@@ -61,11 +74,15 @@ function createTrailSymbol(scale) {
 }
 
 const routeRenderer = new UniqueValueRenderer({
-	field: "kategorie",
+	field: ROUTE_FIELD,
 	uniqueValueInfos: [
 		{
-			value: ROUTE_CATEGORY,
-			symbol: createTrailSymbol(50000),
+			value: WANDERUNG_CATEGORY,
+			symbol: createTrailSymbol(50000, ROUTE_COLORS[WANDERUNG_CATEGORY]),
+		},
+		{
+			value: THEMENWEG_CATEGORY,
+			symbol: createTrailSymbol(50000, ROUTE_COLORS[THEMENWEG_CATEGORY]),
 		},
 	],
 });
@@ -139,8 +156,12 @@ const updateRouteSymbolForScale = () => {
 	const currentScale = viewElement.view.scale;
 	routeRenderer.uniqueValueInfos = [
 		{
-			value: ROUTE_CATEGORY,
-			symbol: createTrailSymbol(currentScale),
+			value: WANDERUNG_CATEGORY,
+			symbol: createTrailSymbol(currentScale, ROUTE_COLORS[WANDERUNG_CATEGORY]),
+		},
+		{
+			value: THEMENWEG_CATEGORY,
+			symbol: createTrailSymbol(currentScale, ROUTE_COLORS[THEMENWEG_CATEGORY]),
 		},
 	];
 	outdooractiveRoutes.renderer = routeRenderer;
