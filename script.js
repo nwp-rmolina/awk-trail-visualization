@@ -2,16 +2,53 @@ const Map = await $arcgis.import("@arcgis/core/Map.js");
 const Basemap = await $arcgis.import("@arcgis/core/Basemap.js");
 const FeatureLayer = await $arcgis.import("@arcgis/core/layers/FeatureLayer.js");
 const WMTSLayer = await $arcgis.import("@arcgis/core/layers/WMTSLayer.js");
+const UniqueValueRenderer = await $arcgis.import("@arcgis/core/renderers/UniqueValueRenderer.js");
+const CIMSymbol = await $arcgis.import("@arcgis/core/symbols/CIMSymbol.js");
 
-const routeRenderer = {
-	type: "simple",
-	symbol: {
-		type: "simple-line",
-		color: [255, 110, 50, 1],
-		width: 4,
-		style: "solid",
+const walkSymbol = new CIMSymbol({
+	data: {
+		type: "CIMSymbolReference",
+		symbol: {
+			type: "CIMLineSymbol",
+			symbolLayers: [
+				{
+					type: "CIMSolidStroke",
+					enable: true,
+					capStyle: "ROUND",
+					joinStyle: "ROUND",
+					width: 1,
+					color: [255, 255, 255, 255],
+				},
+				{
+					type: "CIMSolidStroke",
+					enable: true,
+					capStyle: "ROUND",
+					joinStyle: "ROUND",
+					width: 2.5,
+					color: [190, 226, 98, 255],
+				},
+				{
+					type: "CIMSolidStroke",
+					enable: true,
+					capStyle: "ROUND",
+					joinStyle: "ROUND",
+					width: 4,
+					color: [153, 188, 66, 255],
+				},
+			],
+		},
 	},
-};
+});
+
+const routeRenderer = new UniqueValueRenderer({
+	field: "kategorie",
+	uniqueValueInfos: [
+		{
+			value: "wanderung",
+			symbol: walkSymbol,
+		},
+	],
+});
 
 const viewElement = document.querySelector("arcgis-map");
 viewElement.spatialReference = { wkid: 2056 };
