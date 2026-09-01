@@ -5,8 +5,8 @@ const WMTSLayer = await $arcgis.import("@arcgis/core/layers/WMTSLayer.js");
 const UniqueValueRenderer = await $arcgis.import("@arcgis/core/renderers/UniqueValueRenderer.js");
 const CIMSymbol = await $arcgis.import("@arcgis/core/symbols/CIMSymbol.js");
 
-const ROUTE_SERVICE_URL = "https://services1.arcgis.com/46913CWHRFmfQUln/arcgis/rest/services/oa_routenauszug_fuer_tests/FeatureServer/0";
-const ROUTE_FIELD = "kategorie";
+const TRAIL_SERVICE_URL = "https://services1.arcgis.com/46913CWHRFmfQUln/arcgis/rest/services/oa_routenauszug_fuer_tests/FeatureServer/0";
+const TRAIL_FIELD = "kategorie";
 const WANDERUNG_CATEGORY = "wanderung";
 const THEMENWEG_CATEGORY = "themenweg";
 const MOUNTAINBIKE_ROUTE_CATEGORY = "mountainbike_route";
@@ -16,7 +16,7 @@ const SCALES = {
 	medium: 100000,
 };
 
-const ROUTE_COLORS = {
+const TRAIL_COLORS = {
 	[WANDERUNG_CATEGORY]: {
 		fade: [190, 226, 98, 255],
 		main: [153, 188, 66, 255],
@@ -31,7 +31,7 @@ const ROUTE_COLORS = {
 	},
 };
 
-function createTrailSymbol(scale, colors = ROUTE_COLORS[WANDERUNG_CATEGORY]) {
+function createTrailSymbol(scale, colors = TRAIL_COLORS[WANDERUNG_CATEGORY]) {
 	let scaleFactor = 1;
 
 	if (scale <= SCALES.veryClose) {
@@ -80,11 +80,11 @@ function createTrailSymbol(scale, colors = ROUTE_COLORS[WANDERUNG_CATEGORY]) {
 
 const createCategoryRenderer = (category) => {
 	return new UniqueValueRenderer({
-		field: ROUTE_FIELD,
+		field: TRAIL_FIELD,
 		uniqueValueInfos: [
 			{
 				value: category,
-				symbol: createTrailSymbol(50000, ROUTE_COLORS[category]),
+				symbol: createTrailSymbol(50000, TRAIL_COLORS[category]),
 			},
 		],
 	});
@@ -104,38 +104,38 @@ viewElement.center = {
 viewElement.scale = 50000;
 
 const mountainbikeTrails = new FeatureLayer({
-	url: ROUTE_SERVICE_URL,
+	url: TRAIL_SERVICE_URL,
 	outFields: ["*"],
-	opacity: 0.9,
+	opacity: 1,
 	title: "Mountainbike Trails",
 	renderer: createCategoryRenderer(MOUNTAINBIKE_ROUTE_CATEGORY),
 	visible: true,
 	filter: {
-		where: `${ROUTE_FIELD} = '${MOUNTAINBIKE_ROUTE_CATEGORY}'`,
+		where: `${TRAIL_FIELD} = '${MOUNTAINBIKE_ROUTE_CATEGORY}'`,
 	},
 });
 
 const wanderungTrails = new FeatureLayer({
-	url: ROUTE_SERVICE_URL,
+	url: TRAIL_SERVICE_URL,
 	outFields: ["*"],
-	opacity: 0.9,
+	opacity: 1,
 	title: "Wanderung Trails",
 	renderer: createCategoryRenderer(WANDERUNG_CATEGORY),
 	visible: true,
 	filter: {
-		where: `${ROUTE_FIELD} = '${WANDERUNG_CATEGORY}'`,
+		where: `${TRAIL_FIELD} = '${WANDERUNG_CATEGORY}'`,
 	},
 });
 
 const themenwegTrails = new FeatureLayer({
-	url: ROUTE_SERVICE_URL,
+	url: TRAIL_SERVICE_URL,
 	outFields: ["*"],
-	opacity: 0.9,
+	opacity: 1,
 	title: "Themenweg Trails",
 	renderer: createCategoryRenderer(THEMENWEG_CATEGORY),
 	visible: true,
 	filter: {
-		where: `${ROUTE_FIELD} = '${THEMENWEG_CATEGORY}'`,
+		where: `${TRAIL_FIELD} = '${THEMENWEG_CATEGORY}'`,
 	},
 });
 
@@ -171,11 +171,11 @@ const basemapGallery = document.querySelector("arcgis-basemap-gallery");
 basemapGallery.source = [basemapPixelkarte, basemapPixelkarteGrau, basemapSwissimage];
 basemapGallery.activeBasemap = basemapPixelkarte;
 
-const routeLayerToggle = document.getElementById("route-layer-toggle");
-routeLayerToggle?.addEventListener("change", () => {
-	mountainbikeTrails.visible = routeLayerToggle.checked;
-	wanderungTrails.visible = routeLayerToggle.checked;
-	themenwegTrails.visible = routeLayerToggle.checked;
+const trailLayerToggle = document.getElementById("trail-layer-toggle");
+trailLayerToggle?.addEventListener("change", () => {
+	mountainbikeTrails.visible = trailLayerToggle.checked;
+	wanderungTrails.visible = trailLayerToggle.checked;
+	themenwegTrails.visible = trailLayerToggle.checked;
 });
 
 const scaleValueElement = document.getElementById("scale-value");
@@ -187,11 +187,11 @@ const updateScaleReadout = () => {
 const updateTrailsymbolForScale = () => {
 	const currentScale = viewElement.view.scale;
 	mountainbikeTrails.renderer = createCategoryRenderer(MOUNTAINBIKE_ROUTE_CATEGORY);
-	mountainbikeTrails.renderer.uniqueValueInfos[0].symbol = createTrailSymbol(currentScale, ROUTE_COLORS[MOUNTAINBIKE_ROUTE_CATEGORY]);
+	mountainbikeTrails.renderer.uniqueValueInfos[0].symbol = createTrailSymbol(currentScale, TRAIL_COLORS[MOUNTAINBIKE_ROUTE_CATEGORY]);
 	wanderungTrails.renderer = createCategoryRenderer(WANDERUNG_CATEGORY);
-	wanderungTrails.renderer.uniqueValueInfos[0].symbol = createTrailSymbol(currentScale, ROUTE_COLORS[WANDERUNG_CATEGORY]);
+	wanderungTrails.renderer.uniqueValueInfos[0].symbol = createTrailSymbol(currentScale, TRAIL_COLORS[WANDERUNG_CATEGORY]);
 	themenwegTrails.renderer = createCategoryRenderer(THEMENWEG_CATEGORY);
-	themenwegTrails.renderer.uniqueValueInfos[0].symbol = createTrailSymbol(currentScale, ROUTE_COLORS[THEMENWEG_CATEGORY]);
+	themenwegTrails.renderer.uniqueValueInfos[0].symbol = createTrailSymbol(currentScale, TRAIL_COLORS[THEMENWEG_CATEGORY]);
 	updateScaleReadout();
 };
 
