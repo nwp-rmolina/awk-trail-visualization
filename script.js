@@ -171,11 +171,19 @@ const basemapGallery = document.querySelector("arcgis-basemap-gallery");
 basemapGallery.source = [basemapPixelkarte, basemapPixelkarteGrau, basemapSwissimage];
 basemapGallery.activeBasemap = basemapPixelkarte;
 
-const trailLayerToggle = document.getElementById("trail-layer-toggle");
-trailLayerToggle?.addEventListener("change", () => {
-	mountainbikeTrails.visible = trailLayerToggle.checked;
-	wanderungTrails.visible = trailLayerToggle.checked;
-	themenwegTrails.visible = trailLayerToggle.checked;
+const wanderungToggle = document.getElementById("wanderung-toggle");
+wanderungToggle?.addEventListener("change", () => {
+	wanderungTrails.visible = wanderungToggle.checked;
+});
+
+const themenwegToggle = document.getElementById("themenweg-toggle");
+themenwegToggle?.addEventListener("change", () => {
+	themenwegTrails.visible = themenwegToggle.checked;
+});
+
+const mountainbikeToggle = document.getElementById("mountainbike-toggle");
+mountainbikeToggle?.addEventListener("change", () => {
+	mountainbikeTrails.visible = mountainbikeToggle.checked;
 });
 
 const scaleValueElement = document.getElementById("scale-value");

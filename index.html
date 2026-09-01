@@ -31,10 +31,19 @@
         </arcgis-expand>
       </arcgis-map>
 
-      <div id="trail-layer-toggle-panel" style="position: absolute; top: 16px; left: 72px; z-index: 10; background: rgba(255,255,255,0.9); padding: 8px 10px; border-radius: 6px; box-shadow: 0 1px 4px rgba(0,0,0,0.2); font-family: Arial, sans-serif; font-size: 14px;">
+      <div id="trail-layer-toggle-panel" style="position: absolute; top: 16px; left: 72px; z-index: 10; background: rgba(255,255,255,0.9); padding: 10px; border-radius: 6px; box-shadow: 0 1px 4px rgba(0,0,0,0.2); font-family: Arial, sans-serif; font-size: 14px;">
+        <div style="font-weight: bold; margin-bottom: 8px;">Trail Categories</div>
+        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; margin-bottom: 6px;">
+          <input id="wanderung-toggle" type="checkbox" checked />
+          <span>Wanderung</span>
+        </label>
+        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; margin-bottom: 6px;">
+          <input id="themenweg-toggle" type="checkbox" checked />
+          <span>Themenweg</span>
+        </label>
         <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
-          <input id="trail-layer-toggle" type="checkbox" checked />
-          <span>Show trails</span>
+          <input id="mountainbike-toggle" type="checkbox" checked />
+          <span>Mountainbike Route</span>
         </label>
       </div>
 
