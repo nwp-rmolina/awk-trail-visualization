@@ -9,12 +9,13 @@ const TRAIL_SERVICE_URL = "https://services1.arcgis.com/46913CWHRFmfQUln/arcgis/
 const TRAIL_FIELD = "FolderPath";
 const TRAIL_CATEGORIES = [
 	"Wanderung",
-	"Hindernisfreier Web",
+	"Hindernisfreier Weg",
 	"Themenweg",
-	"Witere Routen",
+	"Weitere Routen",
 	"Veloroute",
 	"E-Bike Route",
 	"Mountainbiketour",
+	"Winterwanderung",
 	"Schneeschuhtour",
 	"Langlaufstrecke",
 	"Tourenskiroute",
@@ -33,8 +34,36 @@ const DEFAULT_TRAIL_COLORS = {
 	main: [153, 188, 66, 255],
 };
 
+// Add a custom pair for each category you want to style differently.
+// Any category without an entry will keep the default green pair.
+const TRAIL_COLOR_PAIRS = {
+	"Wanderung": { fade: [190, 226, 98, 255], main: [153, 188, 66, 255] },
+	"Hindernisfreier Weg": { fade: [215, 215, 182, 255], main: [172, 169, 138, 255] },
+	"Themenweg": { fade: [180, 209, 105, 255], main: [126, 155, 55, 255] },
+	"Weitere Routen": { fade: [215, 215, 182, 255], main: [172, 169, 138, 255] },
+	"Veloroute": { fade: [178, 224, 255, 255], main: [144, 189, 233, 255] },
+	"E-Bike Route": { fade: [140, 208, 255, 255], main: [88, 155, 222, 255] },
+	"Mountainbiketour": { fade: [249, 220, 135, 255], main: [221, 188, 107, 255] },
+	"Winterwanderung": { fade: [255, 191, 232, 255], main: [242, 155, 194, 255] },
+	"Schneeschuhtour": { fade: [251, 178, 248, 255], main: [208, 131, 197, 255] },
+	"Langlaufstrecke": { fade: [112, 231, 255, 255], main: [51, 204, 255, 255] },
+	"Tourenskiroute": { fade: [130, 168, 205, 255], main: [46, 86, 118, 255] },
+	"Schlittelweg": { fade: [243, 193, 171, 255], main: [191, 145, 124, 255] },
+	"Skatingtour": { fade: [235, 210, 249, 255], main: [200, 175, 213, 255] },
+	"Reitroute": { fade: [247, 143, 83, 255], main: [157, 67, 12, 255] },
+};
+
 const TRAIL_COLORS = Object.fromEntries(
-	TRAIL_CATEGORIES.map((category) => [category, { ...DEFAULT_TRAIL_COLORS }])
+	TRAIL_CATEGORIES.map((category) => {
+		const customColors = TRAIL_COLOR_PAIRS[category] ?? {};
+		return [
+			category,
+			{
+				fade: customColors.fade ?? DEFAULT_TRAIL_COLORS.fade,
+				main: customColors.main ?? DEFAULT_TRAIL_COLORS.main,
+			},
+		];
+	})
 );
 
 function normalizeCategoryValue(value) {
@@ -139,7 +168,7 @@ const trailLayers = TRAIL_CATEGORIES.map((category) => {
 		opacity: 1,
 		title: `${category} Trails`,
 		renderer: createCategoryRenderer(category),
-		visible: true,
+		visible: category === "Wanderung",
 		filter: {
 			where: buildCategoryWhereClause(category),
 		},
@@ -193,7 +222,7 @@ TRAIL_CATEGORIES.forEach((category, index) => {
 
 	const checkbox = document.createElement("input");
 	checkbox.type = "checkbox";
-	checkbox.checked = true;
+	checkbox.checked = category === "Wanderung";
 	checkbox.id = `${category.toLowerCase().replace(/[^a-z0-9]+/g, "-")}-toggle`;
 
 	const text = document.createElement("span");
