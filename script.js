@@ -9,50 +9,37 @@ const CIMSymbol = await $arcgis.import("@arcgis/core/symbols/CIMSymbol.js");
 // Trail service configuration
 const TRAIL_SERVICE_URL = "https://services1.arcgis.com/46913CWHRFmfQUln/arcgis/rest/services/oa_routenauszug_fuer_tests/FeatureServer/1";
 const TRAIL_FIELD = "FolderPath";
+
+// Define trail categories with default visibility and color pairs
 const TRAIL_CATEGORIES = [
-	"Wanderung",
-	"Hindernisfreier Weg",
-	"Themenweg",
-	"Weitere Routen",
-	"Veloroute",
-	"E-Bike Route",
-	"Mountainbiketour",
-	"Winterwanderung",
-	"Schneeschuhtour",
-	"Langlaufstrecke",
-	"Tourenskiroute",
-	"Schlittelweg",
-	"Skatingtour",
-	"Reitroute",
+	{ category: "Wanderung", visible: true, colorPair: { fade: [190, 226, 98, 255], main: [153, 188, 66, 255] } },
+	{ category: "Hindernisfreier Weg", visible: false, colorPair: { fade: [215, 215, 182, 255], main: [172, 169, 138, 255] } },
+	{ category: "Themenweg", visible: false, colorPair: { fade: [180, 209, 105, 255], main: [126, 155, 55, 255] } },
+	{ category: "Weitere Routen", visible: false, colorPair: { fade: [215, 215, 182, 255], main: [172, 169, 138, 255] } },
+	{ category: "Veloroute", visible: false, colorPair: { fade: [178, 224, 255, 255], main: [144, 189, 233, 255] } },
+	{ category: "E-Bike Route", visible: false, colorPair: { fade: [140, 208, 255, 255], main: [88, 155, 222, 255] } },
+	{ category: "Mountainbiketour", visible: false, colorPair: { fade: [249, 220, 135, 255], main: [221, 188, 107, 255] } },
+	{ category: "Winterwanderung", visible: false, colorPair: { fade: [255, 191, 232, 255], main: [242, 155, 194, 255] } },
+	{ category: "Schneeschuhtour", visible: false, colorPair: { fade: [251, 178, 248, 255], main: [208, 131, 197, 255] } },
+	{ category: "Langlaufstrecke", visible: false, colorPair: { fade: [112, 231, 255, 255], main: [51, 204, 255, 255] } },
+	{ category: "Tourenskiroute", visible: false, colorPair: { fade: [130, 168, 205, 255], main: [46, 86, 118, 255] } },
+	{ category: "Schlittelweg", visible: false, colorPair: { fade: [243, 193, 171, 255], main: [191, 145, 124, 255] } },
+	{ category: "Skatingtour", visible: false, colorPair: { fade: [235, 210, 249, 255], main: [200, 175, 213, 255] } },
+	{ category: "Reitroute", visible: false, colorPair: { fade: [247, 143, 83, 255], main: [157, 67, 12, 255] } },
 ];
+
+// Create a mapping of trail categories to their corresponding color pairs
+const TRAIL_COLOR_PAIRS = Object.fromEntries(
+	TRAIL_CATEGORIES.map(({ category, colorPair }) => [category, colorPair])
+);
+
+// Extract category names for easy access
+const TRAIL_CATEGORIES_NAMES = TRAIL_CATEGORIES.map(({ category }) => category);
 const SCALES = {
 	veryClose: 20000,
 	close: 50000,
 	medium: 100000,
 };
-
-
-// Color configuration
-const TRAIL_COLOR_PAIRS = {
-	"Wanderung": { fade: [190, 226, 98, 255], main: [153, 188, 66, 255] },
-	"Hindernisfreier Weg": { fade: [215, 215, 182, 255], main: [172, 169, 138, 255] },
-	"Themenweg": { fade: [180, 209, 105, 255], main: [126, 155, 55, 255] },
-	"Weitere Routen": { fade: [215, 215, 182, 255], main: [172, 169, 138, 255] },
-	"Veloroute": { fade: [178, 224, 255, 255], main: [144, 189, 233, 255] },
-	"E-Bike Route": { fade: [140, 208, 255, 255], main: [88, 155, 222, 255] },
-	"Mountainbiketour": { fade: [249, 220, 135, 255], main: [221, 188, 107, 255] },
-	"Winterwanderung": { fade: [255, 191, 232, 255], main: [242, 155, 194, 255] },
-	"Schneeschuhtour": { fade: [251, 178, 248, 255], main: [208, 131, 197, 255] },
-	"Langlaufstrecke": { fade: [112, 231, 255, 255], main: [51, 204, 255, 255] },
-	"Tourenskiroute": { fade: [130, 168, 205, 255], main: [46, 86, 118, 255] },
-	"Schlittelweg": { fade: [243, 193, 171, 255], main: [191, 145, 124, 255] },
-	"Skatingtour": { fade: [235, 210, 249, 255], main: [200, 175, 213, 255] },
-	"Reitroute": { fade: [247, 143, 83, 255], main: [157, 67, 12, 255] },
-};
-
-const TRAIL_COLORS = Object.fromEntries(
-	TRAIL_CATEGORIES.map((category) => [category, TRAIL_COLOR_PAIRS[category]])
-);
 
 // Normalize category values to ensure consistent matching in the SQL filter
 function normalizeCategoryValue(value) {
@@ -126,14 +113,14 @@ function createTrailSymbol(scale, colors) {
 	});
 }
 
-// Create a unique value renderer for each trail category 
+// Create a unique value renderer for each trail category
 const createCategoryRenderer = (category) => {
 	return new UniqueValueRenderer({
 		field: TRAIL_FIELD,
 		uniqueValueInfos: [
 			{
 				value: category,
-				symbol: createTrailSymbol(50000, TRAIL_COLORS[category]),
+				symbol: createTrailSymbol(50000, TRAIL_COLOR_PAIRS[category]),
 			},
 		],
 	});
@@ -142,7 +129,6 @@ const createCategoryRenderer = (category) => {
 
 // Initialize the map and view
 const viewElement = document.querySelector("arcgis-map");
-const mapView = viewElement.view;
 viewElement.spatialReference = { wkid: 2056 };
 viewElement.center = {
 	type: "point",
@@ -155,15 +141,15 @@ viewElement.center = {
 viewElement.scale = 50000;
 
 
-// Create a feature layers for each trail category
-const trailLayers = TRAIL_CATEGORIES.map((category) => {
+// Create feature layers for each trail category
+const trailLayers = TRAIL_CATEGORIES.map(({ category, visible }) => {
 	const layer = new FeatureLayer({
 		url: TRAIL_SERVICE_URL,
 		outFields: ["*"],
 		opacity: 1,
 		title: `${category} Trails`,
 		renderer: createCategoryRenderer(category),
-		visible: category === "Wanderung",
+		visible: visible,
 		filter: {
 			where: buildCategoryWhereClause(category),
 		},
@@ -210,9 +196,8 @@ basemapGallery.activeBasemap = basemapPixelkarte;
 
 // Set up the trail layer toggle panel
 const trailTogglePanel = document.getElementById("trail-layer-toggle-panel");
-const trailToggleMap = new Map();
 
-TRAIL_CATEGORIES.forEach((category, index) => {
+TRAIL_CATEGORIES.forEach(({ category, visible }, index) => {
 	const label = document.createElement("label");
 	label.style.display = "flex";
 	label.style.alignItems = "center";
@@ -222,7 +207,7 @@ TRAIL_CATEGORIES.forEach((category, index) => {
 
 	const checkbox = document.createElement("input");
 	checkbox.type = "checkbox";
-	checkbox.checked = category === "Wanderung";
+	checkbox.checked = visible;
 	checkbox.id = `${category.toLowerCase().replace(/[^a-z0-9]+/g, "-")}-toggle`;
 
 	const text = document.createElement("span");
@@ -233,7 +218,6 @@ TRAIL_CATEGORIES.forEach((category, index) => {
 	trailTogglePanel.appendChild(label);
 
 	const trailLayer = trailLayers[index];
-	trailToggleMap.set(checkbox, trailLayer);
 	checkbox.addEventListener("change", () => {
 		trailLayer.visible = checkbox.checked;
 	});
@@ -251,9 +235,9 @@ const updateTrailsymbolForScale = () => {
 	const currentScale = viewElement.view.scale;
 
 	trailLayers.forEach((trailLayer, index) => {
-		const category = TRAIL_CATEGORIES[index];
+		const category = TRAIL_CATEGORIES_NAMES[index];
 		trailLayer.renderer = createCategoryRenderer(category);
-		trailLayer.renderer.uniqueValueInfos[0].symbol = createTrailSymbol(currentScale, TRAIL_COLORS[category]);
+		trailLayer.renderer.uniqueValueInfos[0].symbol = createTrailSymbol(currentScale, TRAIL_COLOR_PAIRS[category]);
 	});
 
 	updateScaleReadout();
