@@ -1,3 +1,4 @@
+// Load ArcGIS Modules
 const Map = await $arcgis.import("@arcgis/core/Map.js");
 const Basemap = await $arcgis.import("@arcgis/core/Basemap.js");
 const FeatureLayer = await $arcgis.import("@arcgis/core/layers/FeatureLayer.js");
@@ -5,6 +6,7 @@ const WMTSLayer = await $arcgis.import("@arcgis/core/layers/WMTSLayer.js");
 const UniqueValueRenderer = await $arcgis.import("@arcgis/core/renderers/UniqueValueRenderer.js");
 const CIMSymbol = await $arcgis.import("@arcgis/core/symbols/CIMSymbol.js");
 
+// Trail service configuration
 const TRAIL_SERVICE_URL = "https://services1.arcgis.com/46913CWHRFmfQUln/arcgis/rest/services/oa_routenauszug_fuer_tests/FeatureServer/1";
 const TRAIL_FIELD = "FolderPath";
 const TRAIL_CATEGORIES = [
@@ -29,13 +31,8 @@ const SCALES = {
 	medium: 100000,
 };
 
-const DEFAULT_TRAIL_COLORS = {
-	fade: [190, 226, 98, 255],
-	main: [153, 188, 66, 255],
-};
 
-// Add a custom pair for each category you want to style differently.
-// Any category without an entry will keep the default green pair.
+// Color configuration
 const TRAIL_COLOR_PAIRS = {
 	"Wanderung": { fade: [190, 226, 98, 255], main: [153, 188, 66, 255] },
 	"Hindernisfreier Weg": { fade: [215, 215, 182, 255], main: [172, 169, 138, 255] },
@@ -54,18 +51,10 @@ const TRAIL_COLOR_PAIRS = {
 };
 
 const TRAIL_COLORS = Object.fromEntries(
-	TRAIL_CATEGORIES.map((category) => {
-		const customColors = TRAIL_COLOR_PAIRS[category] ?? {};
-		return [
-			category,
-			{
-				fade: customColors.fade ?? DEFAULT_TRAIL_COLORS.fade,
-				main: customColors.main ?? DEFAULT_TRAIL_COLORS.main,
-			},
-		];
-	})
+	TRAIL_CATEGORIES.map((category) => [category, TRAIL_COLOR_PAIRS[category]])
 );
 
+// Normalize category values to ensure consistent matching in the SQL filter
 function normalizeCategoryValue(value) {
 	return String(value ?? "")
 		.trim()
@@ -89,7 +78,8 @@ function buildCategoryWhereClause(category) {
 	].join(" OR ");
 }
 
-function createTrailSymbol(scale, colors = DEFAULT_TRAIL_COLORS) {
+// Create trail symbols with dynamic scaling
+function createTrailSymbol(scale, colors) {
 	let scaleFactor = 1;
 
 	if (scale <= SCALES.veryClose) {
@@ -136,6 +126,7 @@ function createTrailSymbol(scale, colors = DEFAULT_TRAIL_COLORS) {
 	});
 }
 
+// Create a unique value renderer for each trail category 
 const createCategoryRenderer = (category) => {
 	return new UniqueValueRenderer({
 		field: TRAIL_FIELD,
@@ -148,6 +139,8 @@ const createCategoryRenderer = (category) => {
 	});
 };
 
+
+// Initialize the map and view
 const viewElement = document.querySelector("arcgis-map");
 const mapView = viewElement.view;
 viewElement.spatialReference = { wkid: 2056 };
@@ -161,6 +154,8 @@ viewElement.center = {
 };
 viewElement.scale = 50000;
 
+
+// Create a feature layers for each trail category
 const trailLayers = TRAIL_CATEGORIES.map((category) => {
 	const layer = new FeatureLayer({
 		url: TRAIL_SERVICE_URL,
@@ -177,6 +172,8 @@ const trailLayers = TRAIL_CATEGORIES.map((category) => {
 	return layer;
 });
 
+
+// Create WMTS basemap layers for swisstopo
 const swisstopoWmts = new WMTSLayer();
 swisstopoWmts.url = "https://wmts.geo.admin.ch/EPSG/2056/1.0.0/WMTSCapabilities.xml";
 swisstopoWmts.activeLayer = { id: "ch.swisstopo.pixelkarte-farbe" };
@@ -199,16 +196,19 @@ const basemapSwissimage = new Basemap({
 	id: "swisstopo-swissimage",
 });
 
+// Set the map and view on the arcgis-map element
 viewElement.map = new Map({
 	basemap: basemapPixelkarte,
 	layers: trailLayers,
 });
 await viewElement.viewOnReady();
 
+// Set up the basemap gallery
 const basemapGallery = document.querySelector("arcgis-basemap-gallery");
 basemapGallery.source = [basemapPixelkarte, basemapPixelkarteGrau, basemapSwissimage];
 basemapGallery.activeBasemap = basemapPixelkarte;
 
+// Set up the trail layer toggle panel
 const trailTogglePanel = document.getElementById("trail-layer-toggle-panel");
 const trailToggleMap = new Map();
 
@@ -239,12 +239,14 @@ TRAIL_CATEGORIES.forEach((category, index) => {
 	});
 });
 
+// Update the scale readout and trail symbols when the view scale changes
 const scaleValueElement = document.getElementById("scale-value");
 const updateScaleReadout = () => {
 	const currentScale = Math.round(viewElement.view.scale);
 	scaleValueElement.textContent = currentScale.toLocaleString("en-US");
 };
 
+// Update the trail symbols based on the current scale
 const updateTrailsymbolForScale = () => {
 	const currentScale = viewElement.view.scale;
 
@@ -260,6 +262,7 @@ const updateTrailsymbolForScale = () => {
 viewElement.view.watch("scale", updateTrailsymbolForScale);
 updateTrailsymbolForScale();
 
+// Helper function to create a WMTS layer for swisstopo
 function createSwisstopoWmts(layerId) {
 	const wmts = new WMTSLayer();
 	wmts.url = "https://wmts.geo.admin.ch/EPSG/2056/1.0.0/WMTSCapabilities.xml";
